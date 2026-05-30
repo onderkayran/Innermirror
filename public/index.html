@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>InnerMirror</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1814;
+    --ink-soft: #4a4540;
+    --ink-muted: #9a958f;
+    --paper: #faf8f4;
+    --paper-warm: #f3efe8;
+    --paper-card: #ffffff;
+    --accent: #c4813a;
+    --accent-light: #f0dfc4;
+    --accent-dark: #8a5520;
+    --border: rgba(26,24,20,0.1);
+    --border-strong: rgba(26,24,20,0.2);
+    --radius: 16px;
+    --radius-sm: 8px;
+    --shadow: 0 2px 20px rgba(26,24,20,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    font-size: 15px;
+    line-height: 1.6;
+    overscroll-behavior: none;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--paper-card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .header-nav { display: flex; gap: 2px; }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 20px;
+    transition: all 0.2s;
+    font-weight: 400;
+    min-height: 36px;
+  }
+
+  .nav-btn:active { transform: scale(0.95); }
+  .nav-btn.active { background: var(--ink); color: var(--paper); }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .lang-switch {
+    display: flex;
+    gap: 2px;
+    background: var(--paper-warm);
+    border-radius: 20px;
+    padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .lang-btn {
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    cursor: pointer;
+    padding: 4px 7px;
+    border-radius: 16px;
+    line-height: 1;
+    min-height: 24px;
+  }
+
+  .lang-btn.active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* MAIN */
+  main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* UPLOAD */
+  .upload-section { text-align: center; margin-bottom: 24px; }
+
+  .upload-hero {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .upload-sub {
+    color: var(--ink-muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+    font-weight: 300;
+  }
+
+  /* KAMERA VE GALERİ BUTONLARI - Android optimize */
+  .photo-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .photo-btn {
+    background: var(--paper-card);
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .photo-btn:active {
+    transform: scale(0.97);
+    background: var(--paper-warm);
+    border-color: var(--accent);
+  }
+
+  .photo-btn-icon {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+  }
+
+  .photo-btn-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .photo-btn-hint {
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+
+  /* Gizli input'lar */
+  .file-input { display: none; }
+
+  /* PREVIEW */
+  .preview-area {
+    display: none;
+    background: var(--paper-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-top: 16px;
+  }
+
+  .preview-area.visible { display: block; }
+
+  .preview-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+
+  .remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-muted);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 4px 8px;
+  }
+
+  .preview-img-wrap {
+    background: var(--paper-warm);
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .preview-img {
+    max-height: 240px;
+    max-width: 100%;
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+  }
+
+  .note-area { padding: 14px 16px; border-top: 1px solid var(--border); }
+
+  .note-label {
+    font-size: 11px;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .note-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--paper);
+    resize: none;
+    outline: none;
+    height: 68px;
+    -webkit-appearance: none;
+  }
+
+  .note-input:focus { border-color: var(--accent); }
+  .note-input::placeholder { color: var(--ink-muted); }
+
+  .analyze-btn {
+    width: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    -webkit-appearance: none;
+    min-height: 52px;
+  }
+
+  .analyze-btn:active { background: var(--accent); transform: scale(0.99); }
+  .analyze-btn:disabled { background: var(--ink-muted); }
+
+  /* LOADING */
+  .loading { display: none; text-align: center; padding: 40px 20px; }
+  .loading.visible { display: block; }
+
+  .loading-ring {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 14px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-phrase {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  /* RESULT */
+  .result-card {
+    display: none;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-top: 16px;
+    animation: fadeUp 0.4s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-card.visible { display: block; }
+
+  .result-header {
+    background: var(--ink);
+    padding: 18px 20px;
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .result-emoji { font-size: 30px; line-height: 1; }
+
+  .result-date {
+    font-size: 10px;
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 2px;
+  }
+
+  .result-mood-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-style: italic;
+  }
+
+  .result-body { padding: 18px; }
+
+  .result-section { margin-bottom: 16px; }
+
+  .result-section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .result-section-text {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+  .tags-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .tag {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+  }
+
+  /* JOURNAL */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+  }
+
+  .section-sub { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+
+  .clear-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    font-size: 11px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 52px 24px;
+    color: var(--ink-muted);
+  }
+
+  .empty-icon { font-size: 42px; margin-bottom: 14px; opacity: 0.3; }
+  .empty-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--ink-soft); margin-bottom: 6px; }
+  .empty-hint { font-size: 12px; }
+
+  .entry-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .entry-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .entry-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .entry-thumb {
+    width: 44px; height: 44px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .entry-thumb-placeholder {
+    width: 44px; height: 44px;
+    border-radius: var(--radius-sm);
+    background: var(--paper-warm);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .entry-info { flex: 1; min-width: 0; }
+
+  .entry-mood {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .entry-date { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+
+  .entry-chevron { color: var(--ink-muted); transition: transform 0.2s; flex-shrink: 0; }
+  .entry-card.expanded .entry-chevron { transform: rotate(180deg); }
+
+  .entry-card.expanded .entry-card-header { border-bottom: 1px solid var(--border); }
+
+  .entry-body {
+    display: none;
+    padding: 14px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+
+  .entry-card.expanded .entry-body { display: block; }
+
+  .entry-section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 4px;
+    margin-top: 10px;
+  }
+
+  .entry-section-label:first-child { margin-top: 0; }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    color: var(--ink-muted);
+    flex-shrink: 0;
+  }
+
+  /* INSIGHTS */
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .insight-card {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+  }
+
+  .insight-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .insight-label { font-size: 10px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+
+  .mood-chart {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .chart-title { font-family: 'Playfair Display', serif; font-size: 15px; margin-bottom: 2px; }
+  .chart-sub { font-size: 11px; color: var(--ink-muted); margin-bottom: 16px; }
+
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 100px;
+  }
+
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .bar-fill {
+    width: 100%;
+    background: var(--accent-light);
+    border-radius: 3px 3px 0 0;
+    min-height: 3px;
+  }
+
+  .bar-fill.today { background: var(--accent); }
+  .bar-label { font-size: 9px; color: var(--ink-muted); }
+
+  .ai-box {
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .ai-box-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .ai-box-sub { font-size: 11px; color: var(--ink-muted); margin-bottom: 12px; }
+
+  .ai-box-text { font-size: 13px; color: var(--ink-soft); line-height: 1.7; }
+
+  .gen-btn {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+  }
+
+  .gen-btn:active { background: var(--accent); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    transition: transform 0.3s;
+    z-index: 999;
+    white-space: nowrap;
+    max-width: 90vw;
+    text-align: center;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  body.auth-locked #appShell { display: none; }
+  body:not(.auth-locked) #authScreen { display: none; }
+
+  #authScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background: var(--paper);
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 22px;
+    box-shadow: var(--shadow);
+  }
+
+  .auth-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .auth-sub { font-size: 13px; color: var(--ink-muted); text-align: center; margin-bottom: 22px; }
+
+  .auth-tabs { display: flex; gap: 4px; margin-bottom: 18px; background: var(--paper-warm); border-radius: 20px; padding: 3px; }
+
+  .auth-tab {
+    flex: 1;
+    border: none;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px;
+    border-radius: 16px;
+    cursor: pointer;
+    color: var(--ink-muted);
+  }
+
+  .auth-tab.active { background: var(--paper-card); color: var(--ink); box-shadow: 0 1px 4px rgba(26,24,20,0.08); }
+
+  .auth-field { margin-bottom: 12px; }
+
+  .auth-field label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+  }
+
+  .auth-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: var(--paper);
+  }
+
+  .auth-submit {
+    width: 100%;
+    margin-top: 8px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    cursor: pointer;
+    min-height: 48px;
+  }
+
+  .auth-error { font-size: 12px; color: #b33; margin-top: 10px; text-align: center; min-height: 18px; }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .header-right .header-nav { gap: 2px; }
+
+  .plan-badge {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .plan-badge.free { background: var(--paper-warm); color: var(--ink-muted); }
+  .plan-badge.premium { background: var(--accent-light); color: var(--accent-dark); }
+
+  .logout-btn {
+    background: none;
+    border: none;
+    font-size: 11px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    padding: 4px 6px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .quota-pill {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--ink-soft);
+    background: var(--paper-warm);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    margin-bottom: 16px;
+  }
+
+  .quota-pill.limit-reached { color: #9a3b20; border-color: rgba(196,129,58,0.4); background: var(--accent-light); }
+
+  .lock-screen {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--paper-card);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+  }
+
+  .lock-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+  .lock-title { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 8px; }
+  .lock-body { font-size: 13px; color: var(--ink-muted); margin-bottom: 16px; line-height: 1.6; }
+
+  .upgrade-btn {
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .nav-btn.hidden { display: none; }
+
+  .result-section.pattern-free-hidden { display: none; }
+
+  #journalHeaderActions.hidden { display: none; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body class="auth-locked">
+
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-title">InnerMirror</div>
+    <div class="auth-sub" id="authSubtitle" data-i18n="authSubtitle"></div>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="authTabLogin" data-i18n="authLoginTab" onclick="setAuthMode('login')"></button>
+      <button type="button" class="auth-tab" id="authTabSignup" data-i18n="authSignupTab" onclick="setAuthMode('signup')"></button>
+    </div>
+    <form id="authForm" onsubmit="submitAuth(event)">
+      <div class="auth-field">
+        <label for="authEmail" data-i18n="authEmail"></label>
+        <input class="auth-input" type="email" id="authEmail" required autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label for="authPassword" data-i18n="authPassword"></label>
+        <input class="auth-input" type="password" id="authPassword" required minlength="6" autocomplete="current-password">
+      </div>
+      <button type="submit" class="auth-submit" id="authSubmitBtn" data-i18n="authLoginBtn"></button>
+    </form>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
+<div id="appShell">
+<header>
+  <div class="header-left">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      InnerMirror
+    </div>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" class="lang-btn active" data-lang="tr" onclick="setLang('tr')">TR</button>
+      <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="plan-badge free" id="planBadge">Free</span>
+    <button type="button" class="logout-btn" data-i18n="logout" onclick="handleLogout()"></button>
+    <nav class="header-nav">
+      <button type="button" class="nav-btn active" id="navBtnCapture" data-i18n="navCapture" onclick="switchTab('capture')"></button>
+      <button type="button" class="nav-btn" id="navBtnJournal" data-i18n="navJournal" onclick="switchTab('journal')"></button>
+      <button type="button" class="nav-btn hidden" id="navInsights" data-i18n="navInsights" onclick="switchTab('insights')"></button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===== CAPTURE ===== -->
+  <div id="tab-capture" class="tab-content active">
+
+    <div class="upload-section">
+      <div class="quota-pill" id="quotaPill"></div>
+      <div class="upload-hero" data-i18n="uploadHero"></div>
+      <div class="upload-sub" data-i18n="uploadSub"></div>
+
+      <div class="photo-buttons">
+        <!-- Kamera butonu: Android WebView uyumlu -->
+        <label class="photo-btn" for="cameraInput">
+          <div class="photo-btn-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+          <div>
+            <div class="photo-btn-label" data-i18n="cameraLabel"></div>
+            <div class="photo-btn-hint" data-i18n="cameraHint"></div>
+          </div>
+        </label>
+        <input type="file" id="cameraInput" class="file-input"
+               accept="image/*" capture="environment"
+               onchange="handleFile(this.files[0])">
+
+        <!-- Galeri butonu -->
+        <label class="photo-btn" for="galleryInput">
+          <div class="photo-btn-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <div>
+            <div class="photo-btn-label" data-i18n="galleryLabel"></div>
+            <div class="photo-btn-hint" data-i18n="galleryHint"></div>
+          </div>
+        </label>
+        <input type="file" id="galleryInput" class="file-input"
+               accept="image/*"
+               onchange="handleFile(this.files[0])">
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-area" id="previewArea">
+      <div class="preview-header">
+        <span data-i18n="previewSelected"></span>
+        <button type="button" class="remove-btn" data-i18n="previewRemove" onclick="resetPreview()"></button>
+      </div>
+      <div class="preview-img-wrap">
+        <img class="preview-img" id="previewImg" src="" alt="" data-i18n-alt="previewAlt">
+      </div>
+      <div class="note-area">
+        <div class="note-label" data-i18n="noteLabel"></div>
+        <textarea class="note-input" id="noteInput" data-i18n-placeholder="notePlaceholder"></textarea>
+        <button type="button" class="analyze-btn" id="analyzeBtn" onclick="analyze()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <span data-i18n="analyzeBtn"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="loading-ring"></div>
+      <div class="loading-phrase" id="loadingPhrase"></div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card" id="resultCard">
+      <div class="result-header">
+        <div class="result-emoji" id="resultEmoji">✨</div>
+        <div>
+          <div class="result-date" id="resultDate"></div>
+          <div class="result-mood-label" id="resultMoodLabel"></div>
+        </div>
+      </div>
+      <div class="result-body">
+        <div class="result-section">
+          <div class="result-section-title" data-i18n="resultNow"></div>
+          <div class="result-section-text" id="resultNow"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="result-section" id="resultPatternSection">
+          <div class="result-section-title" data-i18n="resultPattern"></div>
+          <div class="result-section-text" id="resultPattern"></div>
+        </div>
+        <div class="divider" id="resultPatternDivider"></div>
+        <div class="result-section">
+          <div class="result-section-title" data-i18n="resultAdvice"></div>
+          <div class="result-section-text" id="resultAdvice"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="result-section">
+          <div class="result-section-title" data-i18n="resultTags"></div>
+          <div class="tags-row" id="resultTags"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== JOURNAL ===== -->
+  <div id="tab-journal" class="tab-content">
+    <div class="section-header">
+      <div>
+        <div class="section-title" data-i18n="journalTitle"></div>
+        <div class="section-sub" id="journalSubtitle"></div>
+      </div>
+      <div id="journalHeaderActions">
+        <button type="button" class="clear-btn" data-i18n="clearAll" onclick="clearAll()"></button>
+      </div>
+    </div>
+    <div id="journalLock" class="lock-screen hidden">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-title" data-i18n="lockJournalTitle"></div>
+      <div class="lock-body" data-i18n="lockJournalBody"></div>
+      <button type="button" class="upgrade-btn" data-i18n="lockUpgradeBtn" onclick="showUpgradeInfo()"></button>
+    </div>
+    <div id="journalEntries"></div>
+  </div>
+
+  <!-- ===== INSIGHTS ===== -->
+  <div id="tab-insights" class="tab-content">
+    <div style="margin-bottom:20px;">
+      <div class="section-title" data-i18n="insightsTitle"></div>
+      <div class="section-sub" data-i18n="insightsSub"></div>
+    </div>
+    <div class="insights-grid" id="insightStats"></div>
+    <div class="mood-chart">
+      <div class="chart-title" data-i18n="chartTitle"></div>
+      <div class="chart-sub" data-i18n="chartSub"></div>
+      <div class="bar-chart" id="barChart"></div>
+    </div>
+    <div class="ai-box">
+      <div class="ai-box-title" data-i18n="aiBoxTitle"></div>
+      <div class="ai-box-sub" data-i18n="aiBoxSub"></div>
+      <div class="ai-box-text" id="aiInsightText"></div>
+      <button type="button" class="gen-btn" onclick="generateInsight()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+        <span data-i18n="genInsightBtn"></span>
+      </button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app-auth.js"></script>
+<script>
+const I18N = {
+  tr: {
+    navCapture: 'Yeni Anı',
+    navJournal: 'Günlük',
+    navInsights: 'Analiz',
+    uploadHero: 'Bugün nasılsın?',
+    uploadSub: 'Bir fotoğraf yükle, duygu haritanı çizelim.',
+    cameraLabel: 'Fotoğraf Çek',
+    cameraHint: 'Kamerayı aç',
+    galleryLabel: 'Galeriden Seç',
+    galleryHint: 'Fotoğraf yükle',
+    previewSelected: 'Seçilen fotoğraf',
+    previewRemove: '× Kaldır',
+    previewAlt: 'Önizleme',
+    noteLabel: 'Not ekle (opsiyonel)',
+    notePlaceholder: 'Bu anı hakkında bir şeyler yaz...',
+    analyzeBtn: 'Analiz Et',
+    resultNow: 'Şu an',
+    resultPattern: 'Duygusal örüntü',
+    resultAdvice: 'Tavsiyeler',
+    resultTags: 'Duygular',
+    journalTitle: 'Günlüğüm',
+    journalSubDefault: 'Tüm anıların burada',
+    journalSubCount: '{n} kayıt',
+    journalSubEmpty: 'Henüz kayıt yok',
+    clearAll: 'Tümünü sil',
+    clearConfirm: 'Tüm kayıtları silmek istediğine emin misin?',
+    insightsTitle: 'Analiz',
+    insightsSub: 'Duygu örüntülerini keşfet',
+    chartTitle: 'Son 7 gün',
+    chartSub: 'Günlük kayıt sayısı',
+    statEntries: 'Kayıt',
+    statDays: 'Gün',
+    statDominant: 'Baskın',
+    aiBoxTitle: 'AI Örüntü Analizi',
+    aiBoxSub: 'Geçmiş kayıtlarına dayalı derin analiz',
+    aiInsightDefault: 'Analiz oluşturmak için butona tıkla.',
+    genInsightBtn: 'Analiz oluştur',
+    loading0: 'Yüzündeki hikayeleri okuyorum...',
+    loading1: 'Duygularının frekansını analiz ediyorum...',
+    loading2: 'Geçmiş örüntülerle karşılaştırıyorum...',
+    loading3: 'Tavsiyeler hazırlanıyor...',
+    toastNoPhoto: 'Önce bir fotoğraf seç!',
+    toastError: 'Hata: {msg}',
+    toastMinEntries: 'En az 2 kayıt gerekli!',
+    insightLoading: '⏳ Analiz hazırlanıyor...',
+    emptyJournalTitle: 'Henüz anı yok',
+    emptyJournalHint: 'İlk fotoğrafını yükle ve yolculuğuna başla.',
+    entryNote: 'Not',
+    entryNow: 'Şu an',
+    entryAdvice: 'Tavsiyeler',
+    entryDefaultMood: 'Analiz',
+    serverError: 'Sunucu hatası ({status})',
+    historyHeader: 'Geçmiş kayıtlar:',
+    userNoteLabel: 'Kullanıcı notu',
+    analyzeUserText: 'Bu fotoğrafı analiz et.',
+    historyEmotions: 'Duygular',
+    historySummary: 'Özet',
+    authSubtitle: 'Duygu günlüğüne giriş yap',
+    authLoginTab: 'Giriş',
+    authSignupTab: 'Kayıt',
+    authEmail: 'E-posta',
+    authPassword: 'Şifre',
+    authLoginBtn: 'Giriş yap',
+    authSignupBtn: 'Hesap oluştur',
+    logout: 'Çıkış',
+    planFree: 'Ücretsiz',
+    planPremium: 'Premium',
+    quotaToday: 'Bugün {used}/{limit} fotoğraf',
+    quotaFull: 'Günlük limit doldu',
+    lockJournalTitle: 'Günlük Premium\'da',
+    lockJournalBody: 'Tüm anılarını saklamak ve geçmişe dönmek için Premium\'a geç.',
+    lockUpgradeBtn: 'Premium hakkında',
+    upgradeInfo: 'Premium için planınızı yükseltin (Supabase\'de plan = premium). Ödeme entegrasyonu yakında.',
+    toastDailyLimit: 'Günlük fotoğraf limitine ulaştın.',
+    toastPremiumRequired: 'Bu özellik Premium üyelere özel.',
+    toastAuthRequired: 'Oturum açman gerekiyor.',
+    configMissing: 'config.js eksik. config.example.js dosyasını kopyalayın.',
+    scriptsMissing: 'Bağlantı dosyaları yüklenemedi. Uygulamayı vercel dev ile aç.',
+    authConfirmEmail: 'E-postanı kontrol et ve hesabını doğrula.',
+  },
+  en: {
+    navCapture: 'New Moment',
+    navJournal: 'Journal',
+    navInsights: 'Insights',
+    uploadHero: 'How are you today?',
+    uploadSub: 'Upload a photo and we\'ll map your emotions.',
+    cameraLabel: 'Take Photo',
+    cameraHint: 'Open camera',
+    galleryLabel: 'From Gallery',
+    galleryHint: 'Upload photo',
+    previewSelected: 'Selected photo',
+    previewRemove: '× Remove',
+    previewAlt: 'Preview',
+    noteLabel: 'Add a note (optional)',
+    notePlaceholder: 'Write something about this moment...',
+    analyzeBtn: 'Analyze',
+    resultNow: 'Right now',
+    resultPattern: 'Emotional pattern',
+    resultAdvice: 'Suggestions',
+    resultTags: 'Emotions',
+    journalTitle: 'My Journal',
+    journalSubDefault: 'All your moments live here',
+    journalSubCount: '{n} entries',
+    journalSubEmpty: 'No entries yet',
+    clearAll: 'Delete all',
+    clearConfirm: 'Are you sure you want to delete all entries?',
+    insightsTitle: 'Insights',
+    insightsSub: 'Discover your emotional patterns',
+    chartTitle: 'Last 7 days',
+    chartSub: 'Daily entry count',
+    statEntries: 'Entries',
+    statDays: 'Days',
+    statDominant: 'Top mood',
+    aiBoxTitle: 'AI Pattern Analysis',
+    aiBoxSub: 'Deep analysis based on your past entries',
+    aiInsightDefault: 'Tap the button to generate an analysis.',
+    genInsightBtn: 'Generate analysis',
+    loading0: 'Reading the stories on your face...',
+    loading1: 'Analyzing the frequency of your feelings...',
+    loading2: 'Comparing with past patterns...',
+    loading3: 'Preparing suggestions...',
+    toastNoPhoto: 'Select a photo first!',
+    toastError: 'Error: {msg}',
+    toastMinEntries: 'At least 2 entries required!',
+    insightLoading: '⏳ Preparing analysis...',
+    emptyJournalTitle: 'No moments yet',
+    emptyJournalHint: 'Upload your first photo and begin your journey.',
+    entryNote: 'Note',
+    entryNow: 'Right now',
+    entryAdvice: 'Suggestions',
+    entryDefaultMood: 'Analysis',
+    serverError: 'Server error ({status})',
+    historyHeader: 'Past entries:',
+    userNoteLabel: 'User note',
+    analyzeUserText: 'Analyze this photo.',
+    historyEmotions: 'Emotions',
+    historySummary: 'Summary',
+    authSubtitle: 'Sign in to your emotion journal',
+    authLoginTab: 'Log in',
+    authSignupTab: 'Sign up',
+    authEmail: 'Email',
+    authPassword: 'Password',
+    authLoginBtn: 'Log in',
+    authSignupBtn: 'Create account',
+    logout: 'Log out',
+    planFree: 'Free',
+    planPremium: 'Premium',
+    quotaToday: '{used}/{limit} photos today',
+    quotaFull: 'Daily limit reached',
+    lockJournalTitle: 'Journal is Premium',
+    lockJournalBody: 'Upgrade to Premium to save all your moments and browse your history.',
+    lockUpgradeBtn: 'About Premium',
+    upgradeInfo: 'Upgrade to Premium (set plan = premium in Supabase). Payments coming soon.',
+    toastDailyLimit: 'You reached your daily photo limit.',
+    toastPremiumRequired: 'This feature is for Premium members.',
+    toastAuthRequired: 'Please sign in.',
+    configMissing: 'Missing config.js — copy from config.example.js.',
+    scriptsMissing: 'App scripts failed to load. Run with vercel dev.',
+    authConfirmEmail: 'Check your email to confirm your account.',
+  },
+};
+
+function detectLang() {
+  const saved = localStorage.getItem('innermirror_lang');
+  if (saved === 'tr' || saved === 'en') return saved;
+  const nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+  return nav.startsWith('tr') ? 'tr' : 'en';
+}
+
+let lang = detectLang();
+let currentImageBase64 = null;
+let currentImageMime = 'image/jpeg';
+let entries = [];
+let lastInsightHtml = null;
+let loadingPhraseIndex = 0;
+let authMode = 'login';
+
+function t(key, vars) {
+  let s = (I18N[lang] && I18N[lang][key]) || I18N.tr[key] || key;
+  if (vars) {
+    Object.keys(vars).forEach(k => {
+      s = s.replace(new RegExp('\\{' + k + '\\}', 'g'), vars[k]);
+    });
+  }
+  return s;
+}
+
+function getLocale() {
+  return lang === 'tr' ? 'tr-TR' : 'en-US';
+}
+
+function getLoadingPhrases() {
+  return [t('loading0'), t('loading1'), t('loading2'), t('loading3')];
+}
+
+function applyI18n() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+    el.alt = t(el.dataset.i18nAlt);
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+  document.getElementById('loadingPhrase').textContent = getLoadingPhrases()[loadingPhraseIndex];
+  const insightEl = document.getElementById('aiInsightText');
+  if (lastInsightHtml) {
+    insightEl.innerHTML = lastInsightHtml;
+  } else {
+    insightEl.textContent = t('aiInsightDefault');
+  }
+  const journalTab = document.getElementById('tab-journal');
+  if (journalTab.classList.contains('active')) renderJournal();
+  const insightsTab = document.getElementById('tab-insights');
+  if (insightsTab.classList.contains('active')) renderInsights();
+  else updateJournalSubtitle();
+  updateQuotaUI();
+  updatePlanBadge();
+}
+
+function setLang(next) {
+  if (next !== 'tr' && next !== 'en') return;
+  lang = next;
+  localStorage.setItem('innermirror_lang', lang);
+  applyI18n();
+}
+
+function updateJournalSubtitle() {
+  const el = document.getElementById('journalSubtitle');
+  if (!isPremiumUser()) {
+    el.textContent = t('lockJournalTitle');
+    return;
+  }
+  if (!entries.length) {
+    el.textContent = t('journalSubEmpty');
+  } else {
+    el.textContent = t('journalSubCount', { n: entries.length });
+  }
+}
+
+function getAnalyzeSystemPrompt() {
+  const langName = lang === 'tr' ? 'Turkish' : 'English';
+  const premium = isPremiumUser();
+  const historyStep = premium
+    ? '2. Connect with past entries when provided\n'
+    : '2. Do not reference past entries; only this photo\n';
+  const patternHint = premium
+    ? `connection to past entries and emotional pattern analysis (1-2 paragraphs, in ${langName})`
+    : `brief reflection on emotional themes in this photo only (1 short paragraph, in ${langName})`;
+
+  return `You are "InnerMirror", an emotional intelligence assistant. You analyze photos users upload to interpret their emotional state, thoughts, and the moment they are in.
+
+Your tasks:
+1. Analyze the emotional state of the person (or scene) in the photo
+${historyStep}3. Give personalized suggestions
+4. Offer a gentle forward-looking perspective
+
+You MUST respond ONLY with valid JSON in this exact shape, with no other text:
+{
+  "emoji": "single fitting emoji",
+  "moodLabel": "short poetic mood label (5-8 words, in ${langName})",
+  "now": "detailed commentary on the present moment (2-3 paragraphs, in ${langName})",
+  "pattern": "${patternHint}",
+  "advice": "concrete personalized suggestions (2-3 bullet points, in ${langName})",
+  "tags": ["emotion1", "emotion2", "emotion3", "emotion4", "emotion5"]
+}
+
+All user-facing string values must be in ${langName}.`;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── AUTH UI ─────────────────────────────────────────────
+function setAuthMode(mode) {
+  authMode = mode;
+  document.getElementById('authTabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('authTabSignup').classList.toggle('active', mode === 'signup');
+  document.getElementById('authSubmitBtn').textContent = t(mode === 'login' ? 'authLoginBtn' : 'authSignupBtn');
+  document.getElementById('authError').textContent = '';
+}
+
+async function submitAuth(e) {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const errEl = document.getElementById('authError');
+  errEl.textContent = '';
+  if (typeof signIn !== 'function' || typeof signUp !== 'function') {
+    errEl.textContent = t('scriptsMissing');
+    return;
+  }
+  try {
+    if (authMode === 'login') {
+      await signIn(email, password);
+    } else {
+      const data = await signUp(email, password);
+      if (!data.session) {
+        errEl.textContent = t('authConfirmEmail');
+        return;
+      }
+    }
+  } catch (err) {
+    errEl.textContent = err.message || String(err);
+  }
+}
+
+function unlockApp() {
+  document.body.classList.remove('auth-locked');
+  updateTierUI();
+  updateQuotaUI();
+  switchTab('capture');
+}
+
+function lockApp() {
+  document.body.classList.add('auth-locked');
+  entries = [];
+  lastInsightHtml = null;
+  resetPreview();
+  document.getElementById('resultCard').classList.remove('visible');
+}
+
+async function handleLogout() {
+  await signOut();
+  lockApp();
+}
+
+function showUpgradeInfo() {
+  showToast(t('upgradeInfo'));
+}
+
+function updatePlanBadge() {
+  const badge = document.getElementById('planBadge');
+  const premium = isPremiumUser();
+  badge.textContent = premium ? t('planPremium') : t('planFree');
+  badge.className = 'plan-badge ' + (premium ? 'premium' : 'free');
+}
+
+function updateTierUI() {
+  const premium = isPremiumUser();
+  document.getElementById('navInsights').classList.toggle('hidden', !premium);
+  document.getElementById('journalLock').classList.toggle('hidden', premium);
+  document.getElementById('journalEntries').classList.toggle('hidden', !premium);
+  document.getElementById('journalHeaderActions').classList.toggle('hidden', !premium);
+  updatePlanBadge();
+  if (!premium && document.getElementById('tab-insights').classList.contains('active')) {
+    switchTab('capture');
+  }
+}
+
+function updateQuotaUI() {
+  const pill = document.getElementById('quotaPill');
+  if (!pill) return;
+  const limit = getDailyLimit();
+  const used = dailyUsed;
+  const full = used >= limit;
+  pill.textContent = full ? t('quotaFull') : t('quotaToday', { used, limit });
+  pill.classList.toggle('limit-reached', full);
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  if (analyzeBtn && !document.getElementById('loading').classList.contains('visible')) {
+    analyzeBtn.disabled = full;
+  }
+}
+
+async function onAuthenticated() {
+  entries = await loadEntriesFromDb();
+  updateTierUI();
+  updateQuotaUI();
+  unlockApp();
+  applyI18n();
+}
+
+function onSignedOut() {
+  lockApp();
+}
+
+// ── INIT ─────────────────────────────────────────────────
+window.onload = async () => {
+  applyI18n();
+  setAuthMode('login');
+  setupDragDrop();
+
+  const ok = await initAuth();
+  if (!ok) {
+    document.getElementById('authError').textContent = t('configMissing');
+  }
+};
+
+// ── TAB ──────────────────────────────────────────────────
+function switchTab(tab) {
+  if (tab === 'insights' && !isPremiumUser()) {
+    showToast(t('toastPremiumRequired'));
+    return;
+  }
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.header-nav .nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const navIds = { capture: 'navBtnCapture', journal: 'navBtnJournal', insights: 'navInsights' };
+  document.getElementById(navIds[tab])?.classList.add('active');
+  if (tab === 'journal') renderJournal();
+  if (tab === 'insights') renderInsights();
+}
+
+// ── DRAG & DROP (tablet/masaüstü için) ───────────────────
+function setupDragDrop() {
+  document.body.addEventListener('dragover', e => e.preventDefault());
+  document.body.addEventListener('drop', e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleFile(file);
+  });
+}
+
+// ── FILE HANDLING ─────────────────────────────────────────
+function handleFile(file) {
+  if (!file) return;
+  currentImageMime = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    currentImageBase64 = dataUrl.split(',')[1];
+    document.getElementById('previewImg').src = dataUrl;
+    document.getElementById('previewArea').classList.add('visible');
+    document.getElementById('resultCard').classList.remove('visible');
+    document.getElementById('loading').classList.remove('visible');
+    // Scroll to preview
+    setTimeout(() => {
+      document.getElementById('previewArea').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetPreview() {
+  currentImageBase64 = null;
+  document.getElementById('previewArea').classList.remove('visible');
+  document.getElementById('resultCard').classList.remove('visible');
+  document.getElementById('cameraInput').value = '';
+  document.getElementById('galleryInput').value = '';
+  document.getElementById('noteInput').value = '';
+}
+
+// ── ANALYZE ───────────────────────────────────────────────
+async function analyze() {
+  if (!currentImageBase64) { showToast(t('toastNoPhoto')); return; }
+  if (!canAnalyzeToday()) { showToast(t('toastDailyLimit')); return; }
+
+  const note = document.getElementById('noteInput').value.trim();
+  const historyContext = buildHistoryContext();
+
+  document.getElementById('loading').classList.add('visible');
+  document.getElementById('resultCard').classList.remove('visible');
+  document.getElementById('analyzeBtn').disabled = true;
+
+  const phrases = getLoadingPhrases();
+  loadingPhraseIndex = 0;
+  document.getElementById('loadingPhrase').textContent = phrases[0];
+  const phraseInterval = setInterval(() => {
+    loadingPhraseIndex = (loadingPhraseIndex + 1) % phrases.length;
+    document.getElementById('loadingPhrase').textContent = phrases[loadingPhraseIndex];
+  }, 2200);
+
+  const systemPrompt = getAnalyzeSystemPrompt();
+
+  const userContent = [
+    {
+      type: 'image',
+      source: { type: 'base64', media_type: currentImageMime, data: currentImageBase64 }
+    },
+    {
+      type: 'text',
+      text: t('analyzeUserText') +
+        (note ? `\n\n${t('userNoteLabel')}: "${note}"` : '') +
+        (historyContext ? `\n\n${t('historyHeader')}\n${historyContext}` : '')
+    }
+  ];
+
+  try {
+    const data = await apiPost({
+      requestType: 'analyze',
+      model: 'claude-opus-4-5',
+      max_tokens: 1500,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userContent }],
+    });
+    const raw = data.content[0].text.trim();
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+
+    clearInterval(phraseInterval);
+    showResult(result);
+    await saveEntry(result, note);
+
+  } catch (err) {
+    clearInterval(phraseInterval);
+    if (err.code === 'DAILY_LIMIT') showToast(t('toastDailyLimit'));
+    else if (err.code === 'AUTH_REQUIRED' || err.message === 'AUTH_REQUIRED') showToast(t('toastAuthRequired'));
+    else showToast(t('toastError', { msg: err.message }));
+    console.error(err);
+  } finally {
+    document.getElementById('loading').classList.remove('visible');
+    updateQuotaUI();
+  }
+}
+
+function buildHistoryContext() {
+  if (!isPremiumUser() || !entries.length) return '';
+  return entries.slice(-5).map(e => {
+    const d = new Date(e.ts).toLocaleDateString(getLocale());
+    return `[${d}] ${e.result.moodLabel} | ${(e.result.tags || []).join(', ')}`;
+  }).join('\n');
+}
+
+// ── SHOW RESULT ───────────────────────────────────────────
+function showResult(result) {
+  document.getElementById('resultEmoji').textContent = result.emoji || '✨';
+  document.getElementById('resultMoodLabel').textContent = result.moodLabel || '';
+  document.getElementById('resultDate').textContent = new Date().toLocaleDateString(getLocale(), {
+    weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
+  });
+  const premium = isPremiumUser();
+  document.getElementById('resultPatternSection').classList.toggle('hidden', !premium);
+  document.getElementById('resultPatternDivider').classList.toggle('hidden', !premium);
+  document.getElementById('resultNow').innerHTML = (result.now || '').replace(/\n/g, '<br>');
+  document.getElementById('resultPattern').innerHTML = (result.pattern || '').replace(/\n/g, '<br>');
+  document.getElementById('resultAdvice').innerHTML = (result.advice || '').replace(/\n/g, '<br>');
+
+  const tagsEl = document.getElementById('resultTags');
+  tagsEl.innerHTML = '';
+  (result.tags || []).forEach(t => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.textContent = t;
+    tagsEl.appendChild(span);
+  });
+
+  document.getElementById('resultCard').classList.add('visible');
+  setTimeout(() => {
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 100);
+}
+
+// ── SAVE ENTRY ────────────────────────────────────────────
+async function saveEntry(result, note) {
+  if (!isPremiumUser()) return;
+  const entry = {
+    ts: Date.now(),
+    note,
+    imgThumb: getThumb(),
+    result,
+  };
+  try {
+    const id = await insertEntry(entry);
+    entries.unshift({ id, ...entry });
+  } catch (err) {
+    console.error('saveEntry', err);
+  }
+}
+
+function getThumb() {
+  if (!currentImageBase64) return null;
+  try {
+    const canvas = document.createElement('canvas');
+    const img = document.getElementById('previewImg');
+    const size = 80;
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const ratio = Math.max(size / img.naturalWidth, size / img.naturalHeight);
+    const w = img.naturalWidth * ratio, h = img.naturalHeight * ratio;
+    ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+    return canvas.toDataURL('image/jpeg', 0.6);
+  } catch { return null; }
+}
+
+// ── JOURNAL ───────────────────────────────────────────────
+function renderJournal() {
+  if (!isPremiumUser()) return;
+  const container = document.getElementById('journalEntries');
+  updateJournalSubtitle();
+
+  if (!entries.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📷</div>
+        <div class="empty-title">${escapeHtml(t('emptyJournalTitle'))}</div>
+        <div class="empty-hint">${escapeHtml(t('emptyJournalHint'))}</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = '<div class="entry-list">' + entries.map(e => {
+    const date = new Date(e.ts).toLocaleDateString(getLocale(), {
+      weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+    });
+    const thumb = e.imgThumb
+      ? `<img class="entry-thumb" src="${e.imgThumb}" alt="">`
+      : `<div class="entry-thumb-placeholder">${e.result.emoji || '📸'}</div>`;
+    const mood = escapeHtml(e.result.moodLabel || t('entryDefaultMood'));
+    const noteBlock = e.note
+      ? `<div class="entry-section-label">${escapeHtml(t('entryNote'))}</div><p>${escapeHtml(e.note)}</p>`
+      : '';
+
+    return `
+    <div class="entry-card" id="ec-${e.id}">
+      <div class="entry-card-header" onclick="toggleEntry(${e.id})">
+        ${thumb}
+        <div class="entry-info">
+          <div class="entry-mood">${mood}</div>
+          <div class="entry-date">${date}</div>
+        </div>
+        <button type="button" class="delete-btn" onclick="deleteEntry(event,${e.id})">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+          </svg>
+        </button>
+        <svg class="entry-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+      <div class="entry-body">
+        ${noteBlock}
+        <div class="entry-section-label">${escapeHtml(t('entryNow'))}</div>
+        <p>${escapeHtml(e.result.now || '').replace(/\n/g,'<br>')}</p>
+        <div class="entry-section-label">${escapeHtml(t('entryAdvice'))}</div>
+        <p>${escapeHtml(e.result.advice || '').replace(/\n/g,'<br>')}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">
+          ${(e.result.tags||[]).map(tag=>`<span class="tag" style="font-size:10px;">${escapeHtml(tag)}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function toggleEntry(id) {
+  document.getElementById('ec-' + id).classList.toggle('expanded');
+}
+
+async function deleteEntry(e, id) {
+  e.stopPropagation();
+  try {
+    await deleteEntryFromDb(id);
+    entries = entries.filter(en => en.id !== id);
+    renderJournal();
+  } catch (err) {
+    showToast(t('toastError', { msg: err.message }));
+  }
+}
+
+async function clearAll() {
+  if (!confirm(t('clearConfirm'))) return;
+  try {
+    await deleteAllEntriesFromDb();
+    entries = [];
+    renderJournal();
+  } catch (err) {
+    showToast(t('toastError', { msg: err.message }));
+  }
+}
+
+// ── INSIGHTS ──────────────────────────────────────────────
+function renderInsights() {
+  const allTags = entries.flatMap(e => e.result.tags || []);
+  const tagFreq = {};
+  allTags.forEach(t => tagFreq[t] = (tagFreq[t] || 0) + 1);
+  const topEmotion = Object.keys(tagFreq).sort((a,b) => tagFreq[b]-tagFreq[a])[0] || '—';
+  const uniqueDays = new Set(entries.map(e => new Date(e.ts).toDateString())).size;
+
+  document.getElementById('insightStats').innerHTML = `
+    <div class="insight-card">
+      <div class="insight-num">${entries.length}</div>
+      <div class="insight-label">${escapeHtml(t('statEntries'))}</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-num">${uniqueDays}</div>
+      <div class="insight-label">${escapeHtml(t('statDays'))}</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-num" style="font-size:22px;">${escapeHtml(topEmotion)}</div>
+      <div class="insight-label">${escapeHtml(t('statDominant'))}</div>
+    </div>`;
+
+  const chart = document.getElementById('barChart');
+  chart.innerHTML = '';
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const count = entries.filter(e => new Date(e.ts).toDateString() === d.toDateString()).length;
+    days.push({ label: d.toLocaleDateString(getLocale(), { weekday: 'short' }), count, isToday: i === 0 });
+  }
+  const maxCount = Math.max(...days.map(d => d.count), 1);
+  days.forEach(d => {
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    const pct = Math.max((d.count / maxCount) * 100, 3);
+    col.innerHTML = `
+      <div class="bar-fill${d.isToday ? ' today' : ''}" style="height:${pct}%;"></div>
+      <div class="bar-label">${d.label}</div>`;
+    chart.appendChild(col);
+  });
+}
+
+async function generateInsight() {
+  if (entries.length < 2) { showToast(t('toastMinEntries')); return; }
+  const el = document.getElementById('aiInsightText');
+  el.textContent = t('insightLoading');
+  lastInsightHtml = null;
+
+  const history = entries.slice(0, 10).map(e => {
+    const d = new Date(e.ts).toLocaleDateString(getLocale());
+    return `[${d}] "${e.result.moodLabel}" | ${t('historyEmotions')}: ${(e.result.tags||[]).join(', ')} | ${t('historySummary')}: ${(e.result.now||'').slice(0,120)}`;
+  }).join('\n\n');
+
+  const insightPrompt = lang === 'tr'
+    ? `Aşağıdaki kullanıcının geçmiş duygu günlüğü kayıtlarını analiz et ve Türkçe olarak:\n1. Baskın duygusal örüntüleri belirle\n2. Zaman içindeki değişimi yorumla\n3. Dikkat edilmesi gereken alanları vurgula\n4. Gelecek için somut öneriler sun\n\nKayıtlar:\n${history}\n\n200-300 kelime, samimi ve empatik bir dille yaz.`
+    : `Analyze the user's past emotion journal entries below and respond in English:\n1. Identify dominant emotional patterns\n2. Comment on changes over time\n3. Highlight areas that deserve attention\n4. Offer concrete suggestions for the future\n\nEntries:\n${history}\n\nWrite 200-300 words in a warm, empathetic tone.`;
+
+  try {
+    const data = await apiPost({
+      requestType: 'insight',
+      model: 'claude-opus-4-5',
+      max_tokens: 800,
+      messages: [{ role: 'user', content: insightPrompt }],
+    });
+    lastInsightHtml = (data.content[0].text || '').replace(/\n/g, '<br>');
+    el.innerHTML = lastInsightHtml;
+  } catch (err) {
+    if (err.code === 'PREMIUM_REQUIRED') showToast(t('toastPremiumRequired'));
+    else showToast(t('toastError', { msg: err.message }));
+    lastInsightHtml = null;
+    el.textContent = t('aiInsightDefault');
+  }
+}
+
+// ── UTILS ─────────────────────────────────────────────────
+function showToast(msg) {
+  const toastEl = document.getElementById('toast');
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  setTimeout(() => toastEl.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
