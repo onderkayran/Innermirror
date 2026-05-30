@@ -43,24 +43,42 @@
   header {
     background: var(--paper-card);
     border-bottom: 1px solid var(--border);
-    padding: 0 20px;
+    padding: 8px 12px 10px;
     position: sticky;
     top: 0;
     z-index: 100;
     display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .header-top {
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 56px;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
   }
 
   .logo {
     font-family: 'Playfair Display', serif;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 400;
     color: var(--ink);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .logo-dot {
@@ -69,7 +87,11 @@
     background: var(--accent);
   }
 
-  .header-nav { display: flex; gap: 2px; }
+  .header-nav {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+  }
 
   .nav-btn {
     background: none;
@@ -78,22 +100,18 @@
     font-size: 12px;
     color: var(--ink-muted);
     cursor: pointer;
-    padding: 6px 12px;
+    padding: 6px 10px;
     border-radius: 20px;
     transition: all 0.2s;
     font-weight: 400;
     min-height: 36px;
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
   }
 
   .nav-btn:active { transform: scale(0.95); }
   .nav-btn.active { background: var(--ink); color: var(--paper); }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-  }
 
   .lang-switch {
     display: flex;
@@ -728,23 +746,26 @@
 
   .auth-error { font-size: 12px; color: #b33; margin-top: 10px; text-align: center; min-height: 18px; }
 
-  .header-right {
+  .header-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     flex-shrink: 0;
   }
 
-  .header-right .header-nav { gap: 2px; }
+  .header-nav .nav-btn { min-width: 0; }
 
   .plan-badge {
-    font-size: 9px;
+    font-size: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 4px 8px;
-    border-radius: 12px;
+    letter-spacing: 0.4px;
+    padding: 4px 6px;
+    border-radius: 10px;
     font-weight: 500;
     white-space: nowrap;
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .plan-badge.free { background: var(--paper-warm); color: var(--ink-muted); }
@@ -756,8 +777,36 @@
     font-size: 11px;
     color: var(--ink-muted);
     cursor: pointer;
-    padding: 4px 6px;
+    padding: 6px;
     font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 50%;
+  }
+
+  .logout-btn:active { background: var(--paper-warm); }
+
+  .logout-btn .logout-label { display: none; }
+
+  @media (min-width: 520px) {
+    header {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 0 16px;
+      min-height: 56px;
+    }
+
+    .header-top { width: auto; flex: 1; }
+    .header-nav { width: auto; flex: 0 1 auto; }
+    .nav-btn { flex: 0 1 auto; padding: 6px 12px; }
+    .logo { font-size: 20px; }
+    .plan-badge { font-size: 9px; max-width: none; padding: 4px 8px; }
+    .logout-btn .logout-label { display: inline; }
+    .logout-btn { min-width: auto; border-radius: 0; padding: 4px 6px; }
   }
 
   .quota-pill {
@@ -832,25 +881,34 @@
 
 <div id="appShell">
 <header>
-  <div class="header-left">
-    <div class="logo">
-      <div class="logo-dot"></div>
-      InnerMirror
+  <div class="header-top">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        InnerMirror
+      </div>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" class="lang-btn active" data-lang="tr" onclick="setLang('tr')">TR</button>
+        <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      </div>
     </div>
-    <div class="lang-switch" role="group" aria-label="Language">
-      <button type="button" class="lang-btn active" data-lang="tr" onclick="setLang('tr')">TR</button>
-      <button type="button" class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+    <div class="header-actions">
+      <span class="plan-badge free" id="planBadge">Free</span>
+      <button type="button" class="logout-btn" onclick="handleLogout()" aria-label="Log out">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span class="logout-label" data-i18n="logout"></span>
+      </button>
     </div>
   </div>
-  <div class="header-right">
-    <span class="plan-badge free" id="planBadge">Free</span>
-    <button type="button" class="logout-btn" data-i18n="logout" onclick="handleLogout()"></button>
-    <nav class="header-nav">
-      <button type="button" class="nav-btn active" id="navBtnCapture" data-i18n="navCapture" onclick="switchTab('capture')"></button>
-      <button type="button" class="nav-btn" id="navBtnJournal" data-i18n="navJournal" onclick="switchTab('journal')"></button>
-      <button type="button" class="nav-btn hidden" id="navInsights" data-i18n="navInsights" onclick="switchTab('insights')"></button>
-    </nav>
-  </div>
+  <nav class="header-nav">
+    <button type="button" class="nav-btn active" id="navBtnCapture" data-i18n="navCapture" onclick="switchTab('capture')"></button>
+    <button type="button" class="nav-btn" id="navBtnJournal" data-i18n="navJournal" onclick="switchTab('journal')"></button>
+    <button type="button" class="nav-btn hidden" id="navInsights" data-i18n="navInsights" onclick="switchTab('insights')"></button>
+  </nav>
 </header>
 
 <main>
