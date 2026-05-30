@@ -1568,7 +1568,7 @@ async function analyze() {
     const data = await apiPost({
       requestType: 'analyze',
       model: 'claude-opus-4-5',
-      max_tokens: 1500,
+      max_tokens: 1000,
       system: systemPrompt,
       messages: [{ role: 'user', content: userContent }],
     });
