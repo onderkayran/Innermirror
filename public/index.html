@@ -1600,17 +1600,29 @@ function buildHistoryContext() {
 
 // ── SHOW RESULT ───────────────────────────────────────────
 function showResult(result) {
+  // Önce tüm alanların string olduğundan emin olalım
+  const safeString = (value) => {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) return value.join('\n');
+    if (typeof value === 'object') return JSON.stringify(value, null, 2);
+    return String(value);
+  };
+
   document.getElementById('resultEmoji').textContent = result.emoji || '✨';
   document.getElementById('resultMoodLabel').textContent = result.moodLabel || '';
   document.getElementById('resultDate').textContent = new Date().toLocaleDateString(getLocale(), {
     weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
   });
+  
   const premium = isPremiumUser();
   document.getElementById('resultPatternSection').classList.toggle('hidden', !premium);
   document.getElementById('resultPatternDivider').classList.toggle('hidden', !premium);
-  document.getElementById('resultNow').innerHTML = (result.now || '').replace(/\n/g, '<br>');
-  document.getElementById('resultPattern').innerHTML = (result.pattern || '').replace(/\n/g, '<br>');
-  document.getElementById('resultAdvice').innerHTML = (result.advice || '').replace(/\n/g, '<br>');
+  
+  // Güvenli şekilde göster
+  document.getElementById('resultNow').innerHTML = safeString(result.now).replace(/\n/g, '<br>');
+  document.getElementById('resultPattern').innerHTML = safeString(result.pattern).replace(/\n/g, '<br>');
+  document.getElementById('resultAdvice').innerHTML = safeString(result.advice).replace(/\n/g, '<br>');
 
   const tagsEl = document.getElementById('resultTags');
   tagsEl.innerHTML = '';
