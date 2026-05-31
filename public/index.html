@@ -1802,6 +1802,23 @@ function renderInsights() {
   });
 }
 
+    // Insight buton durumunu kontrol et (günlük limit)
+  if (isPremiumUser()) {
+    const lastInsightDate = localStorage.getItem('innermirror_last_insight');
+    const today = new Date().toDateString();
+    const btn = document.querySelector('.gen-btn');
+    if (btn && lastInsightDate === today) {
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+      btn.title = 'Bugünlük analiz hakkınızı kullandınız';
+    } else if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.title = 'Yapay zeka ile duygu analizi oluştur';
+    }
+  }
+}
+  
 async function generateInsight() {
   // Premium kontrolü
   if (!isPremiumUser()) {
