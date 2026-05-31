@@ -1803,8 +1803,32 @@ function renderInsights() {
 }
 
 async function generateInsight() {
-  if (entries.length < 2) { showToast(t('toastMinEntries')); return; }
+  // Premium kontrolü
+  if (!isPremiumUser()) {
+    showToast(t('toastPremiumRequired'));
+    return;
+  }
+  
+  // Günlük limit kontrolü (LocalStorage ile)
+  const lastInsightDate = localStorage.getItem('innermirror_last_insight');
+  const today = new Date().toDateString();
+  
+  if (lastInsightDate === today) {
+    showToast('Bugünlük analiz hakkınızı kullandınız. Yarın tekrar deneyin.');
+    return;
+  }
+  
+  if (entries.length < 2) { 
+    showToast(t('toastMinEntries')); 
+    return; 
+  }
+  
   const el = document.getElementById('aiInsightText');
+  const btn = document.querySelector('.gen-btn');
+  
+  // Butonu devre dışı bırak
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
   el.textContent = t('insightLoading');
   lastInsightHtml = null;
 
@@ -1821,16 +1845,29 @@ async function generateInsight() {
     const data = await apiPost({
       requestType: 'insight',
       model: 'claude-opus-4-5',
-      max_tokens: 500,
+      max_tokens: 800,
       messages: [{ role: 'user', content: insightPrompt }],
     });
+    
+    // Başarılı analiz sonrası bugünün tarihini kaydet
+    localStorage.setItem('innermirror_last_insight', today);
+    
     lastInsightHtml = (data.content[0].text || '').replace(/\n/g, '<br>');
     el.innerHTML = lastInsightHtml;
+    
+    // Butonu devre dışı bırak
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    
   } catch (err) {
     if (err.code === 'PREMIUM_REQUIRED') showToast(t('toastPremiumRequired'));
     else showToast(t('toastError', { msg: err.message }));
     lastInsightHtml = null;
     el.textContent = t('aiInsightDefault');
+    
+    // Hata durumunda butonu tekrar aktif et
+    btn.disabled = false;
+    btn.style.opacity = '1';
   }
 }
 
