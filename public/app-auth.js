@@ -30,7 +30,7 @@ function isPremiumUser() {
 }
 
 function getDailyLimit() {
-  return isPremiumUser() ? 5 : 1;
+  return isPremiumUser() ? 3 : 1;
 }
 
 function canAnalyzeToday() {
