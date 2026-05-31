@@ -1800,9 +1800,8 @@ function renderInsights() {
       <div class="bar-label">${d.label}</div>`;
     chart.appendChild(col);
   });
-}
 
-    // Insight buton durumunu kontrol et (günlük limit)
+  // Insight buton durumunu kontrol et (günlük limit)
   if (isPremiumUser()) {
     const lastInsightDate = localStorage.getItem('innermirror_last_insight');
     const today = new Date().toDateString();
