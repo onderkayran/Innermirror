@@ -1761,6 +1761,25 @@ async function clearAll() {
 
 // ── INSIGHTS ──────────────────────────────────────────────
 function renderInsights() {
+  // ✅ YENİ: Kayıtlı insight varsa göster
+  if (isPremiumUser()) {
+    const savedInsightText = localStorage.getItem('innermirror_last_insight_text');
+    const savedInsightDate = localStorage.getItem('innermirror_last_insight');
+    
+    if (savedInsightText && savedInsightText !== '') {
+      const insightEl = document.getElementById('aiInsightText');
+      if (savedInsightDate) {
+        const dateObj = new Date(savedInsightDate);
+        const formattedDate = dateObj.toLocaleDateString(getLocale());
+        insightEl.innerHTML = `<small style="color: var(--ink-muted); display: block; margin-bottom: 12px;">📅 Son analiz: ${formattedDate}</small>${savedInsightText.replace(/\n/g, '<br>')}`;
+      } else {
+        insightEl.innerHTML = savedInsightText.replace(/\n/g, '<br>');
+      }
+      lastInsightHtml = savedInsightText.replace(/\n/g, '<br>');
+    }
+  }
+  
+  // ... MEVCUT KODUN DEVAMI (allTags, tagFreq, chart vs.)
   const allTags = entries.flatMap(e => e.result.tags || []);
   const tagFreq = {};
   allTags.forEach(t => tagFreq[t] = (tagFreq[t] || 0) + 1);
@@ -1800,8 +1819,9 @@ function renderInsights() {
       <div class="bar-label">${d.label}</div>`;
     chart.appendChild(col);
   });
+}
 
-  // Insight buton durumunu kontrol et (günlük limit)
+    // Insight buton durumunu kontrol et (günlük limit)
   if (isPremiumUser()) {
     const lastInsightDate = localStorage.getItem('innermirror_last_insight');
     const today = new Date().toDateString();
@@ -1865,8 +1885,11 @@ async function generateInsight() {
       messages: [{ role: 'user', content: insightPrompt }],
     });
     
-    // Başarılı analiz sonrası bugünün tarihini kaydet
+        // Başarılı analiz sonrası bugünün tarihini kaydet
     localStorage.setItem('innermirror_last_insight', today);
+    
+    // ✅ YENİ: Analiz sonucunu da kaydet
+    localStorage.setItem('innermirror_last_insight_text', data.content[0].text || '');
     
     lastInsightHtml = (data.content[0].text || '').replace(/\n/g, '<br>');
     el.innerHTML = lastInsightHtml;
