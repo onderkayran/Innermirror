@@ -1501,23 +1501,77 @@ function setupDragDrop() {
 }
 
 // ── FILE HANDLING ─────────────────────────────────────────
-function handleFile(file) {
-  if (!file) return;
-  currentImageMime = file.type || 'image/jpeg';
+// ── FILE HANDLING ─────────────────────────────────────────
+function compressImage(file, callback) {
   const reader = new FileReader();
   reader.onload = (e) => {
-    const dataUrl = e.target.result;
-    currentImageBase64 = dataUrl.split(',')[1];
-    document.getElementById('previewImg').src = dataUrl;
-    document.getElementById('previewArea').classList.add('visible');
-    document.getElementById('resultCard').classList.remove('visible');
-    document.getElementById('loading').classList.remove('visible');
-    // Scroll to preview
-    setTimeout(() => {
-      document.getElementById('previewArea').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 100);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Max genişlik 1024px, yükseklik orantılı
+      let width = img.width;
+      let height = img.height;
+      const maxWidth = 1024;
+      
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Kalite %70'e düşür
+      canvas.toBlob((blob) => {
+        callback(blob);
+      }, 'image/jpeg', 0.7);
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function handleFile(file) {
+  if (!file) return;
+  
+  currentImageMime = 'image/jpeg'; // Sıkıştırma sonrası JPEG olacak
+  
+  // Büyük fotoğrafları sıkıştır (1MB üstü)
+  if (file.size > 1 * 1024 * 1024) {
+    compressImage(file, (compressedBlob) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        currentImageBase64 = dataUrl.split(',')[1];
+        document.getElementById('previewImg').src = dataUrl;
+        document.getElementById('previewArea').classList.add('visible');
+        document.getElementById('resultCard').classList.remove('visible');
+        document.getElementById('loading').classList.remove('visible');
+        setTimeout(() => {
+          document.getElementById('previewArea').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      };
+      reader.readAsDataURL(compressedBlob);
+    });
+  } else {
+    // Küçük fotoğraflar normal işle
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      currentImageBase64 = dataUrl.split(',')[1];
+      document.getElementById('previewImg').src = dataUrl;
+      document.getElementById('previewArea').classList.add('visible');
+      document.getElementById('resultCard').classList.remove('visible');
+      document.getElementById('loading').classList.remove('visible');
+      setTimeout(() => {
+        document.getElementById('previewArea').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 function resetPreview() {
