@@ -1621,7 +1621,7 @@ async function analyze() {
   try {
     const data = await apiPost({
       requestType: 'analyze',
-      model: 'claude-haiku-4-5',
+      model: 'claude-opus-4-5',
       max_tokens: 1000,
       system: systemPrompt,
       messages: [{ role: 'user', content: userContent }],
@@ -1932,7 +1932,7 @@ async function generateInsight() {
   try {
     const data = await apiPost({
       requestType: 'insight',
-      model: 'claude-haiku-4-5',
+      model: 'claude-opus-4-5',
       max_tokens: 800,
       messages: [{ role: 'user', content: insightPrompt }],
     });
