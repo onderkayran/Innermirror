@@ -1,7 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
+export const config = {
+  maxDuration: 30
+};
+
 const FREE_DAILY_LIMIT = 1;
-const PREMIUM_DAILY_LIMIT = 5;
+const PREMIUM_DAILY_LIMIT = 3;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function adminClient() {
