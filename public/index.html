@@ -1825,23 +1825,36 @@ function toggleEntry(id) {
 
 async function deleteEntry(e, id) {
   e.stopPropagation();
+  
+  // ✅ Onay penceresi ekle
+  const confirmMessage = t('deleteConfirm') || 'Bu anıyı silmek istediğinize emin misiniz?';
+  if (!confirm(confirmMessage)) {
+    return; // Kullanıcı iptal etti
+  }
+  
   try {
     await deleteEntryFromDb(id);
     entries = entries.filter(en => en.id !== id);
     renderJournal();
+    showToast(t('deleteSuccess') || 'Anı başarıyla silindi.');
   } catch (err) {
     showToast(t('toastError', { msg: err.message }));
   }
 }
 
 async function clearAll() {
-  if (!confirm(t('clearConfirm'))) return;
+  // ✅ Türkçe onay penceresi
+  if (!confirm('Tüm kayıtları silmek istediğine emin misin? Bu işlem geri alınamaz!')) {
+    return; // Kullanıcı iptal etti
+  }
+  
   try {
     await deleteAllEntriesFromDb();
     entries = [];
     renderJournal();
+    showToast('Tüm kayıtlar başarıyla silindi.');
   } catch (err) {
-    showToast(t('toastError', { msg: err.message }));
+    showToast('Hata: ' + err.message);
   }
 }
 
