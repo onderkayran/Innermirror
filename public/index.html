@@ -1639,7 +1639,13 @@ async function analyze() {
   ];
 
    try {
-    const data = await apiPost({...});
+    const data = await apiPost({
+  requestType: 'analyze',
+  model: 'claude-opus-4-5',
+  max_tokens: 1000,
+  system: systemPrompt,
+  messages: [{ role: 'user', content: userContent }],
+});
     const raw = data.content[0].text.trim();
     const clean = raw.replace(/```json|```/g, '').trim();
     const result = JSON.parse(clean);
