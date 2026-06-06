@@ -863,6 +863,7 @@
     background: var(--ink-muted) !important;
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="auth-locked">
 
@@ -1834,35 +1835,111 @@ function toggleEntry(id) {
 async function deleteEntry(e, id) {
   e.stopPropagation();
   
-  // ✅ Onay penceresi ekle
-  const confirmMessage = t('deleteConfirm') || 'Bu anıyı silmek istediğinize emin misiniz?';
-  if (!confirm(confirmMessage)) {
-    return; // Kullanıcı iptal etti
+  const result = await Swal.fire({
+    title: 'Anıyı sil',
+    text: 'Bu anıyı silmek istediğine emin misin?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Evet, sil',
+    cancelButtonText: 'İptal'
+  });
+  
+  if (!result.isConfirmed) {
+    return;
   }
+  
+  Swal.fire({
+    title: 'Siliniyor...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
   
   try {
     await deleteEntryFromDb(id);
     entries = entries.filter(en => en.id !== id);
     renderJournal();
-    showToast(t('deleteSuccess') || 'Anı başarıyla silindi.');
+    
+    Swal.fire({
+      title: 'Silindi!',
+      text: 'Anı başarıyla silindi.',
+      icon: 'success',
+      confirmButtonText: 'Tamam',
+      timer: 1500,
+      showConfirmButton: false
+    });
   } catch (err) {
-    showToast(t('toastError', { msg: err.message }));
+    Swal.fire({
+      title: 'Hata!',
+      text: err.message,
+      icon: 'error',
+      confirmButtonText: 'Tamam'
+    });
   }
 }
 
 async function clearAll() {
-  // ✅ Türkçe onay penceresi
-  if (!confirm('Tüm kayıtları silmek istediğine emin misin? Bu işlem geri alınamaz!')) {
-    return; // Kullanıcı iptal etti
+  const result = await Swal.fire({
+    title: 'Tüm kayıtları sil',
+    html: 'Tüm anıların <strong>kalıcı olarak</strong> silinecek!<br><br>Bu işlem <strong>geri alınamaz</strong>.',
+    icon: 'error',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Evet, hepsini sil',
+    cancelButtonText: 'Vazgeç'
+  });
+  
+  if (!result.isConfirmed) {
+    return;
   }
+  
+  const secondConfirm = await Swal.fire({
+    title: 'Son uyarı!',
+    text: 'Bu işlem gerçekten geri alınamaz. Tüm kayıtlarını silmek istediğine emin misin?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Eminim, sil',
+    cancelButtonText: 'Hayır, vazgeç'
+  });
+  
+  if (!secondConfirm.isConfirmed) {
+    return;
+  }
+  
+  Swal.fire({
+    title: 'Tüm kayıtlar siliniyor...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
   
   try {
     await deleteAllEntriesFromDb();
     entries = [];
     renderJournal();
-    showToast('Tüm kayıtlar başarıyla silindi.');
+    
+    Swal.fire({
+      title: 'Hepsi silindi!',
+      text: 'Tüm kayıtların başarıyla silindi.',
+      icon: 'success',
+      confirmButtonText: 'Tamam',
+      timer: 1500,
+      showConfirmButton: false
+    });
   } catch (err) {
-    showToast('Hata: ' + err.message);
+    Swal.fire({
+      title: 'Hata!',
+      text: err.message,
+      icon: 'error',
+      confirmButtonText: 'Tamam'
+    });
   }
 }
 
